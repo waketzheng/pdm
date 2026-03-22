@@ -11,9 +11,7 @@ import subprocess
 import sys
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING, Mapping, NamedTuple, Sequence, cast
-
-from rich import print_json
+from typing import TYPE_CHECKING, cast
 
 from pdm import termui
 from pdm.cli.commands.base import BaseCommand
@@ -25,8 +23,9 @@ from pdm.signals import pdm_signals
 from pdm.utils import deprecation_warning, expand_env_vars, is_path_relative_to
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator, Mapping, Sequence
     from types import FrameType
-    from typing import Any, Iterator, TypedDict
+    from typing import Any, NamedTuple, TypedDict
 
     from pdm.environments import BaseEnvironment
     from pdm.project import Project
@@ -518,6 +517,8 @@ class Command(BaseCommand):
         if options.list:
             return runner.show_list()
         if options.json:
+            from rich import print_json
+
             return print_json(data=runner.as_json())
         if not options.script:
             project.core.ui.warn("No command is given, default to the Python REPL.")

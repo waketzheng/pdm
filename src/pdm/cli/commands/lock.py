@@ -1,7 +1,6 @@
-import argparse
 import re
 import sys
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from pdm import termui
 from pdm.cli import actions
@@ -17,10 +16,14 @@ from pdm.cli.options import (
     override_option,
     skip_option,
 )
-from pdm.models.markers import EnvSpec
 from pdm.models.specifiers import PySpecSet
-from pdm.project import Project
 from pdm.utils import convert_to_datetime
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace
+
+    from pdm.models.markers import EnvSpec
+    from pdm.project import Project
 
 
 class Command(BaseCommand):
@@ -37,7 +40,7 @@ class Command(BaseCommand):
         lock_strategy_group,
     )
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--refresh",
             action="store_true",
@@ -83,7 +86,7 @@ class Command(BaseCommand):
         )
         target_group.add_argument("--append", action="store_true", help="Append the result to the current lock file")
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         if options.check:
             strategy = actions.check_lockfile(project, False)
             if strategy:

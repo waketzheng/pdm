@@ -1,18 +1,23 @@
 from __future__ import annotations
 
-import argparse
+from typing import TYPE_CHECKING
 
 from pdm.cli.commands.base import BaseCommand
-from pdm.cli.commands.fix.fixers import BaseFixer, LockStrategyFixer, PackageTypeFixer, ProjectConfigFixer
+from pdm.cli.commands.fix.fixers import LockStrategyFixer, PackageTypeFixer, ProjectConfigFixer
 from pdm.exceptions import PdmUsageError
-from pdm.project import Project
 from pdm.termui import Emoji
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace
+
+    from pdm.cli.commands.fix.fixers import BaseFixer
+    from pdm.project import Project
 
 
 class Command(BaseCommand):
     """Fix the project problems according to the latest version of PDM"""
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument("problem", nargs="?", help="Fix the specific problem, or all if not given")
         parser.add_argument("--dry-run", action="store_true", help="Only show the problems")
 
@@ -51,7 +56,7 @@ class Command(BaseCommand):
         """Return a list of fixers to check, the order matters"""
         return [ProjectConfigFixer(project), PackageTypeFixer(project), LockStrategyFixer(project)]
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         if options.dry_run:
             return self.check_problems(project)
         problems = self.find_problems(project)

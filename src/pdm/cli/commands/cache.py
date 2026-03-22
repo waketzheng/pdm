@@ -1,13 +1,17 @@
-import argparse
 import os
-from pathlib import Path
-from typing import Iterable
+from typing import TYPE_CHECKING
 
 from pdm import termui
 from pdm.cli.commands.base import BaseCommand
 from pdm.cli.options import verbose_option
 from pdm.exceptions import PdmUsageError
-from pdm.project import Project
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace
+    from collections.abc import Iterable
+    from pathlib import Path
+
+    from pdm.project import Project
 
 
 class Command(BaseCommand):
@@ -15,7 +19,7 @@ class Command(BaseCommand):
 
     arguments = (verbose_option,)
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         subparsers = parser.add_subparsers(title="commands", metavar="")
         ClearCommand.register_to(subparsers, "clear")
         RemoveCommand.register_to(subparsers, "remove")
@@ -24,7 +28,7 @@ class Command(BaseCommand):
         parser.set_defaults(search_parent=False)
         self.parser = parser
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         self.parser.print_help()
 
 
@@ -77,7 +81,7 @@ class ClearCommand(BaseCommand):
     arguments = (verbose_option,)
     CACHE_TYPES = ("hashes", "http", "wheels", "metadata", "packages")
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "type",
             nargs="?",
@@ -92,7 +96,7 @@ class ClearCommand(BaseCommand):
             os.unlink(file)
         return len(files)
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         if not options.type:
             types: Iterable[str] = self.CACHE_TYPES
         else:
@@ -122,10 +126,10 @@ class RemoveCommand(BaseCommand):
 
     arguments = (verbose_option,)
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument("pattern", help="The pattern to remove")
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         return remove_cache_files(project, options.pattern)
 
 
@@ -134,10 +138,10 @@ class ListCommand(BaseCommand):
 
     arguments = (verbose_option,)
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument("pattern", nargs="?", default="*", help="The pattern to list")
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         rows = [
             (format_size(file_size(file)), file.name) for file in find_files(project.cache("wheels"), options.pattern)
         ]
@@ -149,7 +153,7 @@ class InfoCommand(BaseCommand):
 
     arguments = (verbose_option,)
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         with project.core.ui.open_spinner("Calculating cache files"):
             output = [
                 f"[primary]Cache Root[/]: {project.cache_dir}, "

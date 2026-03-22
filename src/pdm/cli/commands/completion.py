@@ -1,12 +1,16 @@
 from __future__ import annotations
 
-import argparse
 import sys
+from typing import TYPE_CHECKING
 
 from pdm.cli.commands.base import BaseCommand
 from pdm.compat import resources_read_text
 from pdm.exceptions import PdmUsageError
-from pdm.project import Project
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace
+
+    from pdm.project import Project
 
 
 class Command(BaseCommand):
@@ -15,14 +19,14 @@ class Command(BaseCommand):
     arguments = ()
     SUPPORTED_SHELLS = ("bash", "zsh", "fish", "powershell", "pwsh")
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "shell",
             nargs="?",
             help="The shell to generate the scripts for. If not given, PDM will properly guess from `SHELL` env var.",
         )
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         import shellingham
 
         shell = options.shell or shellingham.detect_shell()[0]

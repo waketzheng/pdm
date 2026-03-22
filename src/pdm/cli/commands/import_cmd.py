@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-import argparse
+from argparse import ArgumentParser, Namespace
+from typing import TYPE_CHECKING
 
 from pdm.cli.commands.base import BaseCommand
 from pdm.exceptions import PdmUsageError
 from pdm.formats import FORMATS
-from pdm.project import Project
+
+if TYPE_CHECKING:
+    from pdm.project import Project
 
 
 class Command(BaseCommand):
@@ -13,7 +16,7 @@ class Command(BaseCommand):
 
     name = "import"
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "-d",
             "--dev",
@@ -31,7 +34,7 @@ class Command(BaseCommand):
         parser.add_argument("filename", help="The file name")
         parser.set_defaults(search_parent=False)
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         self.do_import(project, options.filename, options.format, options)
 
     @staticmethod
@@ -39,7 +42,7 @@ class Command(BaseCommand):
         project: Project,
         filename: str,
         format: str | None = None,
-        options: argparse.Namespace | None = None,
+        options: Namespace | None = None,
         reset_backend: bool = True,
     ) -> None:
         """Import project metadata from given file.
@@ -66,7 +69,7 @@ class Command(BaseCommand):
         else:
             key = format
         if options is None:
-            options = argparse.Namespace(dev=False, group=None)
+            options = Namespace(dev=False, group=None)
         project_data, settings = FORMATS[key].convert(project, filename, options)
         dependency_groups = settings.pop("dev-dependencies", {})  # type: ignore[attr-defined]
         pyproject = project.pyproject.open_for_write()

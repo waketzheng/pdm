@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import argparse
 from typing import TYPE_CHECKING
 
 from pdm.cli.commands.base import BaseCommand
@@ -23,6 +22,7 @@ from pdm.cli.options import (
 from pdm.exceptions import PdmUsageError
 
 if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace
     from typing import Collection
 
     from pdm.models.requirements import Requirement
@@ -48,7 +48,7 @@ class Command(BaseCommand):
         skip_option,
     )
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "-d",
             "--dev",
@@ -65,7 +65,7 @@ class Command(BaseCommand):
             help="Only write pyproject.toml and do not sync the working set",
         )
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         if options.editables and options.no_editable:
             raise PdmUsageError("`--no-editable` cannot be used with `-e/--editable`")
         self.do_add(

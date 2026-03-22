@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from typing import TYPE_CHECKING, Any, Iterable, cast
+from typing import TYPE_CHECKING, Any, cast
 from urllib.parse import urlparse, urlunparse
 
 import httpx
@@ -14,17 +14,17 @@ from rich.progress import (
 )
 
 from pdm import termui
-from pdm.cli.commands.publish.package import PackageFile
 from pdm.exceptions import PdmUsageError
-from pdm.project import Project
 from pdm.project.config import DEFAULT_REPOSITORIES
 
 if TYPE_CHECKING:
-    from typing import Callable, Self
+    from typing import Callable, Iterable, Self
 
     from httpx._multipart import MultipartStream
 
     from pdm._types import RepositoryConfig
+    from pdm.cli.commands.publish.package import PackageFile
+    from pdm.project import Project
 
 
 class CallbackWrapperStream(httpx.SyncByteStream):

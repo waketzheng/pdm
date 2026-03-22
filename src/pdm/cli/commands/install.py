@@ -1,6 +1,6 @@
-import argparse
 import sys
 import sysconfig
+from typing import TYPE_CHECKING
 
 from pdm import termui
 from pdm.cli import actions
@@ -17,7 +17,11 @@ from pdm.cli.options import (
     skip_option,
     venv_option,
 )
-from pdm.project import Project
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace
+
+    from pdm.project import Project
 
 
 class Command(BaseCommand):
@@ -35,7 +39,7 @@ class Command(BaseCommand):
         venv_option,
     )
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--check",
             action="store_true",
@@ -66,7 +70,7 @@ class Command(BaseCommand):
                 plugin_root.joinpath(".gitignore").write_text("*\n")
         project.core.ui.echo("Plugins are installed successfully into [primary].pdm-plugins[/].")
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         if not project.pyproject.is_valid and termui.is_interactive():
             actions.ask_for_import(project)
 

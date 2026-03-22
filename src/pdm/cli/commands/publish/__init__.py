@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import argparse
 import os
 from typing import TYPE_CHECKING
 
@@ -13,6 +12,8 @@ from pdm.exceptions import PdmUsageError, PublishError
 from pdm.termui import logger
 
 if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace
+
     from httpx import Response
 
     from pdm.cli.commands.publish.repository import Repository
@@ -24,7 +25,7 @@ class Command(BaseCommand):
 
     arguments = (verbose_option, project_option, skip_option)
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "-r",
             "--repository",
@@ -85,7 +86,7 @@ class Command(BaseCommand):
         )
 
     @staticmethod
-    def _make_package(filename: str, signatures: dict[str, str], options: argparse.Namespace) -> PackageFile:
+    def _make_package(filename: str, signatures: dict[str, str], options: Namespace) -> PackageFile:
         p = PackageFile.from_filename(filename, options.comment)
         if p.base_filename in signatures:
             p.add_gpg_signature(signatures[p.base_filename], p.base_filename + ".asc")
@@ -140,7 +141,7 @@ class Command(BaseCommand):
             raise PublishError(message)
 
     @staticmethod
-    def get_repository(project: Project, options: argparse.Namespace) -> Repository:
+    def get_repository(project: Project, options: Namespace) -> Repository:
         from pdm.cli.commands.publish.repository import Repository
 
         repository = options.repository or os.getenv("PDM_PUBLISH_REPO", "pypi")
@@ -170,7 +171,7 @@ class Command(BaseCommand):
         config.populate_keyring_auth()
         return Repository(project, config)
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         hooks = HookManager(project, options.skip)
 
         hooks.try_emit("pre_publish")

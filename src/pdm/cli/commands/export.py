@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import argparse
 from pathlib import Path
-from typing import Iterable
+from typing import TYPE_CHECKING
 
 import tomlkit
 
@@ -12,16 +11,21 @@ from pdm.cli.options import groups_group, lockfile_option
 from pdm.exceptions import PdmUsageError
 from pdm.formats import FORMATS
 from pdm.formats.pylock import PyLockConverter
-from pdm.models.candidates import Candidate
-from pdm.models.requirements import Requirement
-from pdm.project import Project
 from pdm.project.lockfile import FLAG_INHERIT_METADATA
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace
+    from collections.abc import Iterable
+
+    from pdm.models.candidates import Candidate
+    from pdm.models.requirements import Requirement
+    from pdm.project import Project
 
 
 class Command(BaseCommand):
     """Export the locked packages set to other formats"""
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         lockfile_option.add_to_parser(parser)
         parser.add_argument(
             "-f",
@@ -66,7 +70,7 @@ class Command(BaseCommand):
             "--editable-self", action="store_true", help="Include the project itself as an editable dependency"
         )
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         from pdm.models.repositories.lock import Package
 
         if options.format == "pylock":

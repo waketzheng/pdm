@@ -10,7 +10,7 @@ from pdm.cli.hooks import HookManager
 from pdm.cli.options import skip_option
 from pdm.cli.templates import ProjectTemplate
 from pdm.exceptions import PdmUsageError, ProjectError
-from pdm.models.backends import _BACKENDS, DEFAULT_BACKEND, BuildBackend, get_backend
+from pdm.models.backends import _BACKENDS, DEFAULT_BACKEND, get_backend
 from pdm.models.specifiers import get_specifier
 from pdm.utils import (
     get_user_email_from_git,
@@ -20,6 +20,7 @@ from pdm.utils import (
 )
 
 if TYPE_CHECKING:
+    from pdm.models.backends import BuildBackend
     from pdm.project import Project
 
 

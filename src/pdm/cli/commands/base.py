@@ -1,11 +1,15 @@
 from __future__ import annotations
 
-import argparse
-from argparse import _SubParsersAction
-from typing import Any, Sequence, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
-from pdm.cli.options import Option, global_option, project_option, verbose_option
-from pdm.project import Project
+from pdm.cli.options import global_option, project_option, verbose_option
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace, _SubParsersAction
+    from collections.abc import Sequence
+
+    from pdm.cli.options import Option
+    from pdm.project import Project
 
 C = TypeVar("C", bound="BaseCommand")
 
@@ -22,7 +26,7 @@ class BaseCommand:
     arguments: Sequence[Option] = (verbose_option, global_option, project_option)
 
     @classmethod
-    def init_parser(cls: type[C], parser: argparse.ArgumentParser) -> C:
+    def init_parser(cls: type[C], parser: ArgumentParser) -> C:
         cmd = cls()
         for arg in cmd.arguments:
             arg.add_to_parser(parser)
@@ -51,11 +55,11 @@ class BaseCommand:
         # Store the command instance in the parsed args. See pdm/core.py for more details
         parser.set_defaults(command=command)
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         """Manipulate the argument parser to add more arguments"""
         pass
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         """The command handler function.
 
         :param project: the pdm project instance

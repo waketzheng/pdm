@@ -1,18 +1,20 @@
-import argparse
 import json
-
-from rich import print_json
+from typing import TYPE_CHECKING
 
 from pdm.cli.commands.base import BaseCommand
 from pdm.cli.options import ArgumentGroup, venv_option
 from pdm.cli.utils import check_project_file
-from pdm.project import Project
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace
+
+    from pdm.project import Project
 
 
 class Command(BaseCommand):
     """Show the project information"""
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         venv_option.add_to_parser(parser)
         group = ArgumentGroup("fields", is_mutually_exclusive=True)
         group.add_argument("--python", action="store_true", help="Show the interpreter path")
@@ -27,7 +29,7 @@ class Command(BaseCommand):
         group.add_argument("--json", action="store_true", help="Dump the information in JSON")
         group.add_to_parser(parser)
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         check_project_file(project)
         interpreter = project.environment.interpreter
         packages_path = ""
@@ -47,6 +49,8 @@ class Command(BaseCommand):
         elif options.env:
             project.core.ui.echo(json.dumps(project.environment.spec.markers_with_defaults(), indent=2))
         elif options.json:
+            from rich import print_json
+
             print_json(
                 data={
                     "pdm": {"version": project.core.version},

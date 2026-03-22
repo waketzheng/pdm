@@ -1,14 +1,18 @@
-import argparse
 import os
-from pathlib import Path
-from typing import Any, Mapping
+from typing import TYPE_CHECKING, Any
 
 from pdm import termui
 from pdm._types import RepositoryConfig
 from pdm.cli.commands.base import BaseCommand
 from pdm.exceptions import PdmUsageError
-from pdm.project import Project
 from pdm.project.config import DEFAULT_REPOSITORIES, REPOSITORY, SOURCE, Config
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace
+    from collections.abc import Mapping
+    from pathlib import Path
+
+    from pdm.project import Project
 
 
 class Command(BaseCommand):
@@ -16,7 +20,7 @@ class Command(BaseCommand):
 
     ui: termui.UI
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "-l",
             "--local",
@@ -55,7 +59,7 @@ class Command(BaseCommand):
         if proc.wait() != 0:
             raise PdmUsageError(f"Editor {editor} exited abnormally")
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         self.ui = project.core.ui
         if options.edit:
             if options.key:
@@ -75,7 +79,7 @@ class Command(BaseCommand):
         else:
             self._list_config(project, options)
 
-    def _get_config(self, project: Project, options: argparse.Namespace) -> None:
+    def _get_config(self, project: Project, options: Namespace) -> None:
         from findpython import ALL_PROVIDERS
 
         if options.key in project.project_config.deprecated:  # pragma: no cover
@@ -93,7 +97,7 @@ class Command(BaseCommand):
             value = ["venv", *ALL_PROVIDERS]
         project.core.ui.echo(value)
 
-    def _set_config(self, project: Project, options: argparse.Namespace) -> None:
+    def _set_config(self, project: Project, options: Namespace) -> None:
         config = project.project_config if options.local else project.global_config
         if options.key in config.deprecated:  # pragma: no cover
             project.core.ui.warn(
@@ -148,7 +152,7 @@ class Command(BaseCommand):
                 style=extra_style,
             )
 
-    def _list_config(self, project: Project, options: argparse.Namespace) -> None:
+    def _list_config(self, project: Project, options: Namespace) -> None:
         assert Config.site is not None
         site_title = "Site/default configuration"
         if Config.site.config_file.exists():
@@ -173,7 +177,7 @@ class Command(BaseCommand):
             )
             self._show_config(project.project_config.self_data, {})
 
-    def _delete_config(self, project: Project, options: argparse.Namespace) -> None:
+    def _delete_config(self, project: Project, options: Namespace) -> None:
         config = project.project_config if options.local else project.global_config
         if options.key in config.deprecated:  # pragma: no cover
             project.core.ui.warn(

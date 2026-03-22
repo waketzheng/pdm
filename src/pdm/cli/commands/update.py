@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import argparse
 from collections import defaultdict
 from typing import TYPE_CHECKING
 
@@ -23,7 +22,8 @@ from pdm.cli.options import (
 from pdm.exceptions import PdmUsageError, ProjectError
 
 if TYPE_CHECKING:
-    from typing import Collection
+    from argparse import ArgumentParser, Namespace
+    from collections.abc import Collection
 
     from pdm.models.requirements import Requirement
     from pdm.project import Project
@@ -47,7 +47,7 @@ class Command(BaseCommand):
         venv_option,
     )
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "-t",
             "--top",
@@ -71,7 +71,7 @@ class Command(BaseCommand):
         parser.add_argument("packages", nargs="*", help="If packages are given, only update them")
         parser.set_defaults(dev=None)
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         self.do_update(
             project,
             selection=GroupSelection.from_options(project, options),

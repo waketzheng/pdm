@@ -1,9 +1,13 @@
-import argparse
 import os
+from typing import TYPE_CHECKING
 
 from pdm.cli.commands.base import verbose_option
 from pdm.cli.commands.init import Command as InitCommand
-from pdm.project.core import Project
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace
+
+    from pdm.project import Project
 
 
 class Command(InitCommand):
@@ -13,11 +17,11 @@ class Command(InitCommand):
 
     arguments = (verbose_option,)
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         super().add_arguments(parser)
         parser.add_argument("project_path", help="The path to create the new project")
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         new_project = project.core.create_project(
             options.project_path, global_config=options.config or os.getenv("PDM_CONFIG_FILE")
         )

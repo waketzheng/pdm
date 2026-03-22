@@ -1,29 +1,33 @@
 from __future__ import annotations
 
-import argparse
 import csv
 import io
 import json
 from collections import defaultdict
 from fnmatch import fnmatch
-from typing import Iterable, Mapping, Sequence
+from typing import TYPE_CHECKING
 
 from pdm.cli import actions
 from pdm.cli.commands.base import BaseCommand
 from pdm.cli.options import venv_option
 from pdm.cli.utils import (
-    DirectedGraph,
-    PackageNode,
     build_dependency_graph,
     check_project_file,
     get_dist_location,
     normalize_pattern,
     show_dependency_graph,
 )
-from pdm.compat import importlib_metadata as im
 from pdm.exceptions import PdmUsageError
-from pdm.models.requirements import Requirement
-from pdm.project import Project
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace
+    from collections.abc import Iterable, Mapping, Sequence
+
+    from pdm.cli.utils import DirectedGraph, PackageNode
+    from pdm.compat import importlib_metadata as im
+    from pdm.models.requirements import Requirement
+    from pdm.project import Project
+
 
 # Group label for subdependencies
 SUBDEP_GROUP_LABEL = ":sub"
@@ -34,7 +38,7 @@ class Command(BaseCommand):
 
     DEFAULT_FIELDS = "name,version,location"
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         venv_option.add_to_parser(parser)
         graph = parser.add_mutually_exclusive_group()
 
@@ -116,7 +120,7 @@ class Command(BaseCommand):
             return packages
         return {k: v for k, v in packages.items() if any(fnmatch(k, p) for p in patterns)}
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         # Raise an error if the project is not defined.
         check_project_file(project)
 
@@ -183,7 +187,7 @@ class Command(BaseCommand):
             )
             self.handle_list(packages, name_to_groups, project, options)
 
-    def handle_freeze(self, project: Project, options: argparse.Namespace) -> None:
+    def handle_freeze(self, project: Project, options: Namespace) -> None:
         if options.tree:
             raise PdmUsageError("--tree cannot be used with --freeze")
         if options.reverse:
@@ -214,7 +218,7 @@ class Command(BaseCommand):
         self,
         dep_graph: DirectedGraph[PackageNode | None],
         project: Project,
-        options: argparse.Namespace,
+        options: Namespace,
     ) -> None:
         if options.csv:
             raise PdmUsageError("--csv cannot be used with --tree")
@@ -230,7 +234,7 @@ class Command(BaseCommand):
         packages: Mapping[str, im.Distribution],
         name_to_groups: Mapping[str, set[str]],
         project: Project,
-        options: argparse.Namespace,
+        options: Namespace,
     ) -> None:
         if options.reverse:
             raise PdmUsageError("--reverse cannot be used without --tree")

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import argparse
 from typing import TYPE_CHECKING
 
 from pdm.cli.commands.base import BaseCommand
@@ -19,7 +18,8 @@ from pdm.exceptions import PdmUsageError, ProjectError
 from pdm.utils import normalize_name
 
 if TYPE_CHECKING:
-    from typing import Collection
+    from argparse import ArgumentParser, Namespace
+    from collections.abc import Collection
 
     from pdm.project import Project
 
@@ -38,7 +38,7 @@ class Command(BaseCommand):
         venv_option,
     )
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "-d",
             "--dev",
@@ -56,7 +56,7 @@ class Command(BaseCommand):
         )
         parser.add_argument("packages", nargs="+", help="Specify the packages to remove")
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         self.do_remove(
             project,
             selection=GroupSelection.from_options(project, options),

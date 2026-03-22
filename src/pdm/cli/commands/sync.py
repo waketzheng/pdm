@@ -1,4 +1,4 @@
-import argparse
+from typing import TYPE_CHECKING
 
 from pdm.cli import actions
 from pdm.cli.commands.base import BaseCommand
@@ -13,7 +13,11 @@ from pdm.cli.options import (
     skip_option,
     venv_option,
 )
-from pdm.project import Project
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace
+
+    from pdm.project import Project
 
 
 class Command(BaseCommand):
@@ -30,7 +34,7 @@ class Command(BaseCommand):
         venv_option,
     )
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "-r",
             "--reinstall",
@@ -38,7 +42,7 @@ class Command(BaseCommand):
             help="Force reinstall existing dependencies",
         )
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         actions.check_lockfile(project)
         selection = GroupSelection.from_options(project, options)
         actions.do_sync(

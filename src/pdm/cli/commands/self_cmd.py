@@ -1,22 +1,26 @@
 from __future__ import annotations
 
-import argparse
 import shlex
 import subprocess
 import sys
-from typing import Any
+from typing import TYPE_CHECKING
 
 from pdm import termui
 from pdm.cli.actions import get_latest_pdm_version_from_pypi
 from pdm.cli.commands.base import BaseCommand
 from pdm.cli.options import verbose_option
 from pdm.cli.utils import PackageNode, build_dependency_graph
-from pdm.compat import Distribution
 from pdm.environments import BareEnvironment
 from pdm.models.markers import EnvSpec
 from pdm.models.working_set import WorkingSet
-from pdm.project import Project
 from pdm.utils import is_in_zipapp, normalize_name, parse_version
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace, _SubParsersAction
+    from typing import Any
+
+    from pdm.compat import Distribution
+    from pdm.project.core import Project
 
 PDM_REPO = "https://github.com/pdm-project/pdm"
 
@@ -64,13 +68,13 @@ class Command(BaseCommand):
     @classmethod
     def register_to(
         cls,
-        subparsers: argparse._SubParsersAction,
+        subparsers: _SubParsersAction,
         name: str | None = None,
         **kwargs: Any,
     ) -> None:
         return super().register_to(subparsers, name, aliases=["plugin"], **kwargs)
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         subparsers = parser.add_subparsers(title="commands", metavar="")
         ListCommand.register_to(subparsers)
         if not is_in_zipapp():
@@ -80,7 +84,7 @@ class Command(BaseCommand):
         parser.set_defaults(search_parent=False)
         self.parser = parser
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         self.parser.print_help()
 
 
@@ -90,10 +94,10 @@ class ListCommand(BaseCommand):
     arguments = (verbose_option,)
     name = "list"
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument("--plugins", action="store_true", help="List plugins only")
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         distributions = list_distributions(plugin_only=options.plugins)
         echo = project.core.ui.echo
         if not distributions:
@@ -119,7 +123,7 @@ class AddCommand(BaseCommand):
     arguments = (verbose_option,)
     name = "add"
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--pip-args",
             help="Arguments that will be passed to pip install",
@@ -131,7 +135,7 @@ class AddCommand(BaseCommand):
             help="Specify one or many package names, each package can have a version specifier",
         )
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         pip_args = ["install", *shlex.split(options.pip_args), *options.packages]
 
         try:
@@ -150,7 +154,7 @@ class RemoveCommand(BaseCommand):
     arguments = (verbose_option,)
     name = "remove"
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--pip-args",
             help="Arguments that will be passed to pip uninstall",
@@ -186,7 +190,7 @@ class RemoveCommand(BaseCommand):
 
         return sorted(result)
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         packages_to_remove = self._resolve_dependencies_to_remove(options.packages)
         if not packages_to_remove:
             project.core.ui.echo("No package to remove.", err=True)
@@ -211,7 +215,7 @@ class UpdateCommand(BaseCommand):
     arguments = (verbose_option,)
     name = "update"
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--head",
             action="store_true",
@@ -235,7 +239,7 @@ class UpdateCommand(BaseCommand):
             default="",
         )
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         from pdm.__version__ import __version__, read_version
 
         locked = "[locked]" if options.frozen_deps else ""

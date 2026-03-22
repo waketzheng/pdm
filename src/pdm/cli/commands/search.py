@@ -1,15 +1,19 @@
 from __future__ import annotations
 
-import argparse
 import textwrap
+from typing import TYPE_CHECKING
 
-from pdm import termui
-from pdm._types import SearchResults
 from pdm.cli.commands.base import BaseCommand
 from pdm.cli.options import verbose_option
-from pdm.models.working_set import WorkingSet
-from pdm.project import Project
 from pdm.utils import normalize_name
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace
+
+    from pdm import termui
+    from pdm._types import SearchResults
+    from pdm.models.working_set import WorkingSet
+    from pdm.project import Project
 
 
 def print_results(
@@ -47,10 +51,10 @@ class Command(BaseCommand):
 
     arguments = (verbose_option,)
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument("query", help="Query string to search")
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         project.core.ui.warn(
             "Since pypi.org no longer supports search API, this command is deprecated and will be removed in future versions. "
             "Please visit `https://pypi.org` in the browser to search for packages.",

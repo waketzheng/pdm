@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import argparse
 import os
 import shutil
 import tarfile
 import tempfile
 from pathlib import Path
-from typing import Mapping
+from typing import TYPE_CHECKING
 
 from pdm.cli.commands.base import BaseCommand
 from pdm.cli.hooks import HookManager
@@ -18,7 +17,12 @@ from pdm.cli.options import (
     verbose_option,
 )
 from pdm.exceptions import ProjectError
-from pdm.project import Project
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace
+    from collections.abc import Mapping
+
+    from pdm.project import Project
 
 
 class Command(BaseCommand):
@@ -111,7 +115,7 @@ class Command(BaseCommand):
 
         hooks.try_emit("post_build", artifacts=artifacts, config_settings=config_settings)
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--no-sdist",
             dest="sdist",
@@ -135,7 +139,7 @@ class Command(BaseCommand):
             help="Do not clean the target directory",
         )
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         self.do_build(
             project,
             sdist=options.sdist,

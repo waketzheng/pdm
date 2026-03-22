@@ -9,11 +9,12 @@ from pdm.exceptions import PdmUsageError
 from pdm.models.candidates import Candidate
 from pdm.models.project_info import ProjectInfo
 from pdm.models.requirements import parse_requirement
-from pdm.project import Project
 from pdm.utils import normalize_name, parse_version
 
 if TYPE_CHECKING:
     from unearth import Package
+
+    from pdm.project import Project
 
 
 def filter_stable(package: Package) -> bool:

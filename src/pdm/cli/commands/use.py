@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import argparse
+from typing import TYPE_CHECKING
 
 from pdm import termui
 from pdm.cli.commands.base import BaseCommand
@@ -10,14 +10,18 @@ from pdm.exceptions import NoPythonVersion
 from pdm.models.caches import JSONFileCache
 from pdm.models.python import PythonInfo
 from pdm.models.venv import get_venv_python
-from pdm.project import Project
 from pdm.utils import is_conda_base_python
+
+if TYPE_CHECKING:
+    from argparse import ArgumentParser, Namespace
+
+    from pdm.project import Project
 
 
 class Command(BaseCommand):
     """Use the given python version or path as base interpreter. If not found, PDM will try to install one."""
 
-    def add_arguments(self, parser: argparse.ArgumentParser) -> None:
+    def add_arguments(self, parser: ArgumentParser) -> None:
         skip_option.add_to_parser(parser)
         unattended_use_group = parser.add_mutually_exclusive_group()
         unattended_use_group.add_argument(
@@ -202,7 +206,7 @@ class Command(BaseCommand):
         hooks.try_emit("post_use", python=selected_python)
         return selected_python
 
-    def handle(self, project: Project, options: argparse.Namespace) -> None:
+    def handle(self, project: Project, options: Namespace) -> None:
         self.do_use(
             project,
             python=options.python,
