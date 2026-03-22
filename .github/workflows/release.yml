@@ -19,7 +19,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
 
       - uses: actions/setup-python@v6
         with:
@@ -40,7 +40,7 @@ jobs:
           pipx run build
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: pdm-wheel
           path: dist/*.whl
@@ -72,7 +72,7 @@ jobs:
           prerelease: ${{ steps.check_version.outputs.PRERELEASE }}
 
       - name: Trigger Bucket Update
-        uses: benc-uk/workflow-dispatch@v1.2.4
+        uses: benc-uk/workflow-dispatch@v1.3.1
         with:
           workflow: Excavator
           repo: frostming/scoop-frostming
@@ -102,14 +102,12 @@ jobs:
       PYAPP_SELF_COMMAND: app # since `self` has been taken in `pdm`
       PYAPP_DISTRIBUTION_EMBED: true
       PYAPP_PROJECT_FEATURES: locked
-      SCCACHE_GHA_ENABLED: "true"
-      RUSTC_WRAPPER: "sccache"
       SOURCE_FILE: ${{ matrix.os != 'windows-2025' && 'pyapp' || 'pyapp.exe' }}
       TARGET_FILE: ${{ matrix.os != 'windows-2025' && 'pdm' || 'pdm.exe' }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
 
       - name: Fetch PyApp
         run: >-
@@ -123,9 +121,16 @@ jobs:
 
       - name: Run sccache-cache
         uses: mozilla-actions/sccache-action@v0.0.9
+        if: matrix.os != 'macos-15-intel'
+
+      - name: Set sccache env
+        if: matrix.os != 'macos-15-intel'
+        run: |
+          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
 
       - name: Download artifacts
-        uses: actions/download-artifact@v7.0.0
+        uses: actions/download-artifact@v8.0.0
         with:
           name: pdm-wheel
           path: dist
@@ -145,7 +150,7 @@ jobs:
           mv target/release/$SOURCE_FILE ../$TARGET_FILE
 
       - name: Upload Assets
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: pdm-${{ github.ref_name }}-${{ env.TARGET_TRIPLE }}
           path: ${{ env.TARGET_FILE }}

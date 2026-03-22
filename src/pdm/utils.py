@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Mapping
 
 from packaging.specifiers import InvalidSpecifier, SpecifierSet
-from packaging.version import Version, _cmpkey
+from packaging.version import Version
 
 from pdm.compat import importlib_metadata
 from pdm.exceptions import PDMDeprecationWarning, PdmException
@@ -347,18 +347,33 @@ def comparable_version(version: str) -> Version:
     """Normalize a version to make it valid in a specifier."""
     parsed = parse_version(version or "0.0.0")
     if parsed.local is not None:
-        # strip the local part
-        parsed._version = parsed._version._replace(local=None)
+        # strip the local part to make
+        # comparable_version("1.2.3+local1") == Version("1.2.3")
+        if hasattr(parsed, "__replace__"):  # packaging >= 26
+            parsed = parsed.__replace__(local=None)
+        else:
+            # packaging < 26 does not have __replace__ method
+            # In this version, we need to manually update _version and recompute _key
+            # Note: In packaging >= 26, _key is a read-only property, but this else branch
+            # only executes on packaging < 26 where _key is a regular attribute that can be
+            # assigned. We use object.__setattr__() instead of direct assignment to satisfy
+            # type checkers that analyze based on the current packaging version.
+            from packaging.version import _cmpkey
 
-        # To make comparable_version("1.2.3+local1") == Version("1.2.3")
-        parsed._key = _cmpkey(
-            parsed._version.epoch,
-            parsed._version.release,
-            parsed._version.pre,
-            parsed._version.post,
-            parsed._version.dev,
-            parsed._version.local,
-        )
+            parsed._version = parsed._version._replace(local=None)
+
+            object.__setattr__(
+                parsed,
+                "_key",
+                _cmpkey(
+                    parsed._version.epoch,
+                    parsed._version.release,
+                    parsed._version.pre,
+                    parsed._version.post,
+                    parsed._version.dev,
+                    parsed._version.local,
+                ),
+            )
 
     return parsed
 
