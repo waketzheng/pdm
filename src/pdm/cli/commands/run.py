@@ -11,7 +11,7 @@ import subprocess
 import sys
 from functools import partial
 from pathlib import Path
-from typing import TYPE_CHECKING, NamedTuple, cast
+from typing import TYPE_CHECKING, NamedTuple, Sequence, cast
 
 from pdm import termui
 from pdm.cli.commands.base import BaseCommand
@@ -23,7 +23,7 @@ from pdm.signals import pdm_signals
 from pdm.utils import deprecation_warning, expand_env_vars, is_path_relative_to
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Mapping, Sequence
+    from collections.abc import Iterator, Mapping
     from types import FrameType
     from typing import Any, TypedDict
 
